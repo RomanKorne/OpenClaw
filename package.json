@@ -1,0 +1,9 @@
+{
+  "name": "openclaw-skeleton",
+  "version": "0.1.0",
+  "description": "Scaffold for OpenClaw agent skills and CI",
+  "scripts": {
+    "lint": "echo \"No lint configured\"",
+    "test": "echo \"No tests configured\""
+  }
+}
