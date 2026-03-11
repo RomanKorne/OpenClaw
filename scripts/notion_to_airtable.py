@@ -1,11 +1,8 @@
 #!/usr/bin/env python3
 """
-Simple Notion -> Airtable sync utility (one-shot). Uses NOTION_API_KEY and AIRTABLE_API_KEY from env.
-Adds pages' titles and links to Airtable.Memories if not present.
+Notion -> Airtable sync utility (one-shot) using only standard library.
 """
-import os,sys,json
-from urllib.parse import urlparse
-import requests
+import os,sys,json,urllib.request,urllib.error
 
 NOTION_TOKEN=os.environ.get('NOTION_API_KEY')
 AIRTABLE_TOKEN=os.environ.get('AIRTABLE_API_KEY')
@@ -15,42 +12,52 @@ if not NOTION_TOKEN or not AIRTABLE_TOKEN:
     print('Missing tokens')
     sys.exit(1)
 
+def call_json(url, method='GET', headers=None, data=None):
+    if headers is None: headers={}
+    req=urllib.request.Request(url, method=method)
+    for k,v in headers.items(): req.add_header(k,v)
+    if data is not None:
+        bdata=json.dumps(data).encode('utf-8')
+        req.data=bdata
+    try:
+        with urllib.request.urlopen(req, timeout=30) as f:
+            return json.load(f)
+    except urllib.error.HTTPError as e:
+        try:
+            body=e.read().decode('utf-8')
+            return json.loads(body)
+        except Exception:
+            return {'error':str(e)}
+
+
 def notion_search():
     url='https://api.notion.com/v1/search'
     headers={'Authorization':f'Bearer {NOTION_TOKEN}','Notion-Version':'2022-06-28','Content-Type':'application/json'}
-    r=requests.post(url, headers=headers, json={})
-    r.raise_for_status()
-    return r.json().get('results',[])
+    return call_json(url, method='POST', headers=headers, data={}).get('results',[])
 
 def airtable_get_titles():
     url=f'https://api.airtable.com/v0/{BASE}/Memories'
     headers={'Authorization':f'Bearer {AIRTABLE_TOKEN}'}
-    r=requests.get(url, headers=headers)
-    r.raise_for_status()
-    records=r.json().get('records',[])
+    r=call_json(url, headers=headers)
+    records=r.get('records',[])
     return { (rec.get('fields',{}).get('Title') or '').strip(): rec for rec in records }
 
 def airtable_add(records):
     url=f'https://api.airtable.com/v0/{BASE}/Memories'
     headers={'Authorization':f'Bearer {AIRTABLE_TOKEN}','Content-Type':'application/json'}
-    r=requests.post(url, headers=headers, json={'records':records})
-    r.raise_for_status()
-    return r.json()
+    return call_json(url, method='POST', headers=headers, data={'records':records})
 
 pages=notion_search()
 existing=airtable_get_titles()
 to_add=[]
 for p in pages:
-    # Try several fallbacks for title
     title=''
     try:
         title = p.get('properties',{}).get('title',{}).get('title',[{}])[0].get('plain_text','')
     except Exception:
         title=''
     if not title:
-        # fallback to url or object id
-        url=p.get('url') or p.get('id')
-        title = (url or '').split('/')[-1]
+        title = p.get('url') or p.get('id') or ''
     title=title.strip()
     if not title or title in existing:
         continue
