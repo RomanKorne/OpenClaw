@@ -1,0 +1,30 @@
+name: gog-publish-template
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Run tests
+        run: npm test || true
+
+  publish (example):
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Publish to ClawHub (placeholder)
+        env:
+          CLAWHUB_TOKEN: ${{ secrets.CLAWHUB_TOKEN }}
+        run: |
+          echo "This step should call the ClawHub CLI/API using CLAWHUB_TOKEN to publish the skill."
+          echo "Add real publish commands here after setting CLAWHUB_TOKEN secret."
