@@ -1,0 +1,11 @@
+version: '3.8'
+services:
+  agent-browser:
+    build: .
+    restart: unless-stopped
+    network_mode: bridge
+    environment:
+      - NODE_ENV=production
+    # mount a folder for logs/config if needed
+    volumes:
+      - ./data:/data
