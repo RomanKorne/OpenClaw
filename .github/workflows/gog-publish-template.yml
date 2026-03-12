@@ -16,7 +16,7 @@ jobs:
       - name: Run tests
         run: npm test || true
 
-  publish (example):
+  publish_example:
     needs: build-and-test
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
