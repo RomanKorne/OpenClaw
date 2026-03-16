@@ -168,6 +168,13 @@ else
   ok "env OPENAI_API_KEY: not set (optional)"
 fi
 
+# ANTHROPIC_API_KEY is required for openclaw-local agent (Claude Haiku).
+if [[ -n "${ANTHROPIC_API_KEY-}" ]]; then
+  ok "env ANTHROPIC_API_KEY: configured"
+else
+  warn "env ANTHROPIC_API_KEY: not set (required for openclaw-local agent)"
+fi
+
 section "Backups"
 if launchctl print "gui/$(id -u)/com.roman.codex.backup" >/dev/null 2>&1; then
   local_exit="$(launchctl print "gui/$(id -u)/com.roman.codex.backup" 2>/dev/null | awk -F'= ' '/last exit code/ {print $2; exit}')"
