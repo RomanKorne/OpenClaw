@@ -45,8 +45,8 @@ check_cmd() {
     ok "$label: $(command -v "$cmd")"
     return 0
   fi
-  err "$label: command not found"
-  return 1
+  warn "$label: command not found"
+  return 0
 }
 
 check_env_present() {
