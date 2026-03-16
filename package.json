@@ -3,7 +3,14 @@
   "version": "0.1.0",
   "description": "Scaffold for OpenClaw agent skills and CI",
   "scripts": {
+    "gh:menu": "bash scripts/github_shortcuts_menu.sh",
+    "check:system": "bash scripts/system_status.sh",
+    "tg:local": "bash scripts/telegram_system_bridge.sh local",
+    "tg:chatid": "bash scripts/telegram_system_bridge.sh get-chat-id",
+    "tg:bind": "bash scripts/telegram_system_bridge.sh bind-chat",
+    "tg:send": "bash scripts/telegram_system_bridge.sh send",
+    "tg:poll": "bash scripts/telegram_system_bridge.sh poll",
     "lint": "echo \"No lint configured\"",
-    "test": "echo \"No tests configured\""
+    "test": "bash scripts/system_status.sh"
   }
 }
